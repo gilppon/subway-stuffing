@@ -407,7 +407,13 @@ export function CardsScreen({ save, onBack }: { save: SaveData; onBack: () => vo
             >
               <div className="relative aspect-square bg-[#14181e]">
                 {has && p.image ? (
-                  <img src={p.image} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={p.image}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="grid h-full w-full place-items-center" style={{ background: has ? p.suit : "#101418" }}>
                     <span className={cn("display text-5xl", has ? "text-[#f4efe6]" : "text-[#2c4a52]")}>
@@ -431,7 +437,7 @@ export function CardsScreen({ save, onBack }: { save: SaveData; onBack: () => vo
           <div className="grid w-full max-w-lg gap-4 border-2 border-[#f0c14a] bg-[#0c1c22] p-4 sm:grid-cols-[180px_1fr]" onClick={(e) => e.stopPropagation()}>
             <div className="aspect-square overflow-hidden bg-[#14181e]">
               {owned.has(picked.id) && picked.image ? (
-                <img src={picked.image} alt="" className="h-full w-full object-cover" />
+                <img src={picked.image} alt="" decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <div className="grid h-full w-full place-items-center display text-6xl text-[#2c4a52]">?</div>
               )}
@@ -612,7 +618,13 @@ export function ResultsScreen({
                   return (
                     <div key={id} className="w-20 border border-[#f0c14a] bg-[#0c1c22]">
                       {p.image ? (
-                        <img src={p.image} alt="" className="aspect-square w-full object-cover" />
+                        <img
+                          src={p.image}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="aspect-square w-full object-cover"
+                        />
                       ) : (
                         <div className="grid aspect-square place-items-center display text-2xl" style={{ background: p.suit }}>
                           {p.name.slice(0, 1)}
