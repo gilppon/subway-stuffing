@@ -1,6 +1,9 @@
 // Portal ad bridge (Poki / CrazyGames / mock auto-detect).
 // Any failure or block falls back on a timeout so gameplay never stalls.
+// Audio is force-muted for the duration of every ad: both portals require it.
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { audio } from "./audio";
 
 declare global {
   interface Window {
@@ -125,9 +128,11 @@ export const Ads = {
   async commercialBreak(): Promise<void> {
     if (provider === "poki" && ready) {
       try {
-        await withTimeout(window.PokiSDK.commercialBreak(), 10000, undefined);
+        await withTimeout(window.PokiSDK.commercialBreak(() => audio.setAdMuted(true)), 10000, undefined);
       } catch {
         /* ignore */
+      } finally {
+        audio.setAdMuted(false);
       }
       return;
     }
@@ -135,28 +140,43 @@ export const Ads = {
       try {
         await withTimeout(
           window.CrazyGames?.SDK?.ad?.requestAd("midgame", {
-            adStarted: () => {},
-            adFinished: () => {},
-            adError: () => {},
+            adStarted: () => audio.setAdMuted(true),
+            adFinished: () => audio.setAdMuted(false),
+            adError: () => audio.setAdMuted(false),
           }),
           10000,
           undefined,
         );
       } catch {
         /* ignore */
+      } finally {
+        audio.setAdMuted(false);
       }
       return;
     }
     if (!adUI) return;
-    await withTimeout(new Promise<void>((r) => adUI!("commercial", () => r())), 8000, undefined);
+    audio.setAdMuted(true);
+    try {
+      await withTimeout(new Promise<void>((r) => adUI!("commercial", () => r())), 8000, undefined);
+    } finally {
+      audio.setAdMuted(false);
+    }
   },
 
   async rewardedBreak(): Promise<boolean> {
     if (provider === "poki" && ready) {
       try {
-        return Boolean(await withTimeout(window.PokiSDK.rewardedBreak(), 15000, false));
+        return Boolean(
+          await withTimeout(
+            window.PokiSDK.rewardedBreak({ onStart: () => audio.setAdMuted(true) }),
+            15000,
+            false,
+          ),
+        );
       } catch {
         return false;
+      } finally {
+        audio.setAdMuted(false);
       }
     }
     if (provider === "crazy" && ready) {
@@ -164,11 +184,13 @@ export const Ads = {
         let ok = false;
         await withTimeout(
           window.CrazyGames?.SDK?.ad?.requestAd("rewarded", {
-            adStarted: () => {},
+            adStarted: () => audio.setAdMuted(true),
             adFinished: () => {
+              audio.setAdMuted(false);
               ok = true;
             },
             adError: () => {
+              audio.setAdMuted(false);
               ok = false;
             },
           }),
@@ -178,6 +200,8 @@ export const Ads = {
         return ok;
       } catch {
         return false;
+      } finally {
+        audio.setAdMuted(false);
       }
     }
     if (!adUI) return false;

@@ -5,13 +5,15 @@ export class SubwayAudio {
   private master: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   muted = false;
+  /** Separate from the player's own mute: portals require audio off during ads. */
+  private adMuted = false;
   private lastSlap = 0;
 
   ensure() {
     if (!this.ctx) {
       const ctx = new AudioContext();
       const master = ctx.createGain();
-      master.gain.value = this.muted ? 0 : 0.42;
+      master.gain.value = this.muted || this.adMuted ? 0 : 0.42;
       master.connect(ctx.destination);
       const len = Math.floor(ctx.sampleRate * 0.45);
       const buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -25,15 +27,24 @@ export class SubwayAudio {
     return this.ctx;
   }
 
-  setMuted(muted: boolean) {
-    this.muted = muted;
+  private applyGain() {
     if (this.master && this.ctx) {
-      this.master.gain.setTargetAtTime(muted ? 0 : 0.42, this.ctx.currentTime, 0.02);
+      this.master.gain.setTargetAtTime(this.muted || this.adMuted ? 0 : 0.42, this.ctx.currentTime, 0.02);
     }
   }
 
+  setMuted(muted: boolean) {
+    this.muted = muted;
+    this.applyGain();
+  }
+
+  setAdMuted(m: boolean) {
+    this.adMuted = m;
+    this.applyGain();
+  }
+
   play(name: Sfx) {
-    if (this.muted) return;
+    if (this.muted || this.adMuted) return;
     const ctx = this.ctx ?? this.ensure();
     if (!this.master) return;
     const now = ctx.currentTime;
