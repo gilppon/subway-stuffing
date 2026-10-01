@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/plex-400-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Archivo Black";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/archivo-black-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Share Tech Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/share-tech-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: dark;
+  --ink: #071014;
+  --paper: #f3ead7;
+  --yellow: #f0c14a;
+  --mint: #7dffe1;
+  --danger: #ff5a3c;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+::selection {
+  background: #f0c14a;
+  color: #1a120c;
+}
+
+:focus-visible {
+  outline: 2px solid #f0c14a;
+  outline-offset: 3px;
+}
+
+.display {
+  font-family: "Archivo Black", "Arial Black", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.led {
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+  text-shadow: 0 0 12px currentColor;
+}
+
+.hazard {
+  background: repeating-linear-gradient(-45deg, #f0c14a 0 10px, #121416 10px 20px);
+  background-size: 28px 28px;
+  animation: hazard-move 0.7s linear infinite;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  gap: 3rem;
+  animation: ticker 32s linear infinite;
+}
+
+.stamp-in {
+  animation: stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.tug {
+  animation: tug 0.9s ease-in-out infinite;
+}
+
+.rise-in {
+  animation: rise 0.55s ease both;
+}
+
+.led-blink {
+  animation: blink 1s steps(1) infinite;
+}
+
+.receipt {
+  background-color: #f3ead7;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 27px,
+    rgba(80, 50, 20, 0.06) 28px
+  );
+  color: #1c140e;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+}
+
+.perforation {
+  background-image: radial-gradient(circle, #071014 5px, transparent 5.5px);
+  background-size: 16px 12px;
+  background-repeat: repeat-x;
+}
+
+.metro-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.metro-scroll::-webkit-scrollbar-thumb {
+  background: #f0c14a;
+}
+
+@keyframes hazard-move {
+  to {
+    background-position: 28px 0;
+  }
+}
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes stamp {
+  0% {
+    transform: scale(1.7) rotate(-14deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(-8deg);
+    opacity: 1;
+  }
+}
+
+@keyframes tug {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-26px);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hazard,
+  .ticker-track,
+  .tug,
+  .stamp-in,
+  .rise-in,
+  .led-blink {
+    animation: none;
+  }
+}
