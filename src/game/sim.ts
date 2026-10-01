@@ -1151,7 +1151,7 @@ export class SubwaySim {
     ctx.fillText("PULL LEFT, RELEASE", 80, 90);
     ctx.fillStyle = "#f4efe6";
     ctx.font = "13px 'IBM Plex Sans', sans-serif";
-    ctx.fillText("The yellow gap is the door", 80, 110);
+    ctx.fillText("Aim for the yellow gap", 80, 110);
   }
 
   private pressure(d: Doll) {
@@ -1431,7 +1431,7 @@ export class SubwaySim {
     ctx.fillStyle = "#f4efe6";
     ctx.font = "700 13px 'IBM Plex Sans', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("HIT THE ZIP", r.x + r.w / 2, r.y + r.h - 28);
+    ctx.fillText("HIT THE ZIPS", r.x + r.w / 2, r.y + r.h - 28);
     ctx.textAlign = "left";
     ctx.restore();
   }

@@ -156,12 +156,12 @@ export function GameView({
         </div>
         {mode === "endless" && (
           <div className="hidden rounded border border-[#ff5a3c] px-2 py-1 text-xs text-[#ffb15a] sm:block">
-            {snap?.wave ?? 1}WAVE · BEST {snap?.peak ?? 0}
+            WAVE {snap?.wave ?? 1} · BEST {snap?.peak ?? 0}
           </div>
         )}
         <div className="ml-auto flex items-center gap-2">
           {station.boss && (
-            <div className="hidden items-center gap-1 sm:flex" aria-label="zip durability">
+            <div className="hidden items-center gap-1 sm:flex" aria-label="giant suitcase zips">
               {(snap?.zippers ?? [true, true, true]).map((intact, i) => (
                 <span
                   key={i}
@@ -188,7 +188,7 @@ export function GameView({
             PAUSE
           </button>
           <button className="border border-[#2c4a52] px-2 py-1 text-xs" onClick={onToggleMute}>
-            {muted ? "MUTE" : "SOUND"}
+            {muted ? "SOUND OFF" : "SOUND ON"}
           </button>
         </div>
       </header>
@@ -256,7 +256,7 @@ export function GameView({
             <div className="absolute inset-x-0 top-[4%] flex justify-center px-3">
               <div className="w-full max-w-md border-2 border-[#f0c14a] bg-[#0c1c22]/95 p-3 text-[#f4efe6]">
                 <div className="flex items-center justify-between text-[10px] tracking-[0.22em] text-[#7dffe1]">
-                  <span>First shift guide</span>
+                  <span>First flight guide</span>
                   <button
                     className="border border-[#2c4a52] px-2 py-0.5 text-[11px] text-[#9fb8b4] hover:text-[#f4efe6]"
                     onClick={() => {
@@ -275,7 +275,7 @@ export function GameView({
                     <b className="text-[#f0c14a]">2</b> Line up the angle, then <b>release</b> to launch.
                   </li>
                   <li>
-                    <b className="text-[#f0c14a]">3</b> Fill at least the legal capacity (100%) before the doors close for one star.
+                    <b className="text-[#f0c14a]">3</b> Fill at least the legal capacity (100%) before the doors close, for one star.
                   </li>
                 </ol>
                 <div className="mt-2 flex justify-center">
@@ -339,7 +339,7 @@ export function GameView({
           <div className="mt-1 text-[10px] tracking-widest text-[#6f8d88]">100% is the legal mark · 200% is the rush-hour answer · crush {Math.round(compressOf(upgrades.compress) * 100)}%</div>
         </div>
         <div className="flex max-w-[46%] items-center gap-1 overflow-x-auto">
-          {ids.length === 0 && <span className="text-xs text-[#6f8d88]">No passengers waiting</span>}
+          {ids.length === 0 && <span className="text-xs text-[#6f8d88]">No one waiting</span>}
           {ids.map((id, i) => {
             const p = PASSENGERS[id];
             if (!p) return null;

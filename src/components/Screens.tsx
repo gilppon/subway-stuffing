@@ -91,7 +91,7 @@ export function TitleScreen({
           <span className="border border-[#f0c14a]/60 px-2 py-1 text-[#f0c14a]">{won(save.ticketRevenue)}</span>
           <span className="border border-[#2c4a52] px-2 py-1">DEX {save.collectedCards.length}/12</span>
           <button className="border border-[#2c4a52] px-2 py-1" onClick={onMute}>
-            {save.muted ? "MUTE" : "SOUND"}
+            {save.muted ? "SOUND OFF" : "SOUND ON"}
           </button>
         </div>
       </header>
@@ -105,13 +105,13 @@ export function TitleScreen({
           </h1>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-[#d5e6e2] sm:text-base">
             Sling rush-hour commuters into the car before the doors close and hit 200% occupancy.
-            Spend the fares on the ticket booth, meet every face in the bestiary.
+            Spend the fares at the ticket booth, meet every face in the dex.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <PanelButton kicker="CAMPAIGN" onClick={onRide}>
               STUFF THIS TRAIN
             </PanelButton>
-            <PanelButton kicker="SURVIVAL" tone="danger" onClick={onEndless}>
+            <PanelButton kicker="ENDLESS" tone="danger" onClick={onEndless}>
               ENDLESS RUSH
             </PanelButton>
           </div>
@@ -128,9 +128,9 @@ export function TitleScreen({
           </div>
           <ol className="mt-8 grid max-w-lg grid-cols-3 gap-2 text-xs">
             {[
-              ["01", "PULL", "Drag left to load the sling"],
-              ["02", "LAUNCH", "Aim at the gap in the doors"],
-              ["03", "CRUSH", "Hit 200% before they shut"],
+              ["01", "PULL", "Drag left to draw the sling back"],
+              ["02", "LAUNCH", "Aim for the gap in the doors"],
+              ["03", "CRUSH", "Reach 200% before they close"],
             ].map(([n, t, d]) => (
               <li key={n} className="border border-[#2c4a52] bg-[#071014]/70 p-3">
                 <div className="led text-[#f0c14a]">{n}</div>
@@ -147,9 +147,9 @@ export function TitleScreen({
             <div className="led text-[#3cba6a]">08:12</div>
           </div>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            <Stat label="OPEN" value={`${starred}/6`} />
+            <Stat label="STARS" value={`${starred}/6`} />
             <Stat label="ENDLESS BEST" value={`${save.endlessMax}`} />
-            <Stat label="TOTAL BOARDED" value={`${save.totalBoarded}`} />
+            <Stat label="BOARDED" value={`${save.totalBoarded}`} />
           </div>
           <label className="mt-4 block text-[10px] tracking-[0.2em] text-[#9fb8b4]">
             DISPATCHER NAME
@@ -161,7 +161,7 @@ export function TitleScreen({
             />
           </label>
           <div className="mt-4">
-            <div className="text-[10px] tracking-[0.22em] text-[#f0c14a]">LOCAL HALL</div>
+            <div className="text-[10px] tracking-[0.22em] text-[#f0c14a]">HALL OF FAME</div>
             <ul className="mt-2 space-y-1 text-sm">
               {save.hall.map((h, i) => (
                 <li key={h.name} className="flex justify-between border-b border-[#1c3338] py-1">
@@ -212,9 +212,9 @@ export function MapScreen({
   onBuySpace: () => void;
 }) {
   return (
-    <Shell title="LINE MAP" kicker="METRO MAP" onBack={onBack} save={save}>
+    <Shell title="LINE MAP" kicker="ALL STATIONS" onBack={onBack} save={save}>
       <p className="max-w-2xl text-sm text-[#c9ddd8]">
-        Ride any station at will. Only Space Metro needs the Suitcase broken or an Orbit Pass.
+        Ride any station you like. Only Space Metro needs the Giant Suitcase broken or an Orbit Pass.
         Stars come from occupancy: 100 / 150 / 200.
       </p>
       <div className="metro-scroll relative mt-8 overflow-x-auto pb-6">
@@ -245,12 +245,12 @@ export function MapScreen({
                   </div>
                   <p className="mt-2 min-h-12 text-xs leading-relaxed text-[#c9ddd8]">{st.blurb}</p>
                   <div className="mt-2 flex flex-wrap gap-1">
-<Tag>{st.time.toFixed(1)}s</Tag>
+                    <Tag>DOORS {st.time.toFixed(1)}s</Tag>
                     <Tag>CAP {st.capacity}</Tag>
-                    {st.poleTop > 0 && <Tag>Safety pole</Tag>}
-                    {st.wind > 0 && <Tag>Crosswind</Tag>}
-                    {st.boss && <Tag>Boss</Tag>}
-                    {st.gravity < 800 && <Tag>Low gravity</Tag>}
+                    {st.poleTop > 0 && <Tag>SAFETY POLE</Tag>}
+                    {st.wind > 0 && <Tag>CROSSWIND</Tag>}
+                    {st.boss && <Tag>BOSS</Tag>}
+                    {st.gravity < 800 && <Tag>LOW GRAVITY</Tag>}
                   </div>
                   {locked ? (
                     <button
@@ -300,7 +300,7 @@ export function ShopScreen({
     <Shell title="TICKET BOOTH" kicker="FARE MACHINE" onBack={onBack} save={save}>
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         <aside className="border-4 border-[#24383e] bg-[#0b181c] p-4">
-          <div className="text-[10px] tracking-[0.22em] text-[#7dffe1]">BALANCE</div>
+          <div className="text-[10px] tracking-[0.22em] text-[#7dffe1]">FARE BALANCE</div>
           <div className="led mt-1 bg-[#04140c] px-3 py-4 text-3xl text-[#7dffb2]">{won(save.ticketRevenue)}</div>
           <p className="mt-3 text-xs leading-relaxed text-[#9fb8b4]">
             Every successful boarding pays out here. Compression is what gets you past 200%.
@@ -316,7 +316,7 @@ export function ShopScreen({
               onReset();
             }}
           >
-            {armed ? "THIS DELETES YOUR RECORD" : "RESET PROGRESS"}
+            {armed ? "THIS DELETES YOUR PROGRESS" : "RESET PROGRESS"}
           </button>
         </aside>
         <div className="space-y-3">
@@ -342,7 +342,7 @@ export function ShopScreen({
                   onClick={() => onBuy(up.id)}
                   className="border border-[#f0c14a] px-3 py-2 text-sm disabled:opacity-40"
                 >
-                  {maxed ? "MAXED" : poor ? won(cost) : `BUY ${won(cost)}`}
+                  {maxed ? "MAX LEVEL" : poor ? won(cost) : `BUY ${won(cost)}`}
                 </button>
               </div>
             );
@@ -351,7 +351,7 @@ export function ShopScreen({
             <div className="min-w-0 flex-1">
               <div className="text-[10px] tracking-[0.2em] text-[#c86bff]">ORBIT PASS</div>
               <div className="text-lg font-semibold">Orbit Pass</div>
-              <p className="text-xs text-[#c9ddd8]">Opens the Space Metro line. Breaking the Seoul Station Suitcase gets you the same door.</p>
+              <p className="text-xs text-[#c9ddd8]">Opens the Space Metro line. Beat the Giant Suitcase at Seoul Station and it unlocks too.</p>
             </div>
             <button
               disabled={save.spaceUnlocked || save.ticketRevenue < SPACE_PASS_COST}
@@ -388,8 +388,8 @@ export function CardsScreen({ save, onBack }: { save: SaveData; onBack: () => vo
   const picked = open ? PASSENGERS[open] : null;
   const owned = new Set(save.collectedCards);
   return (
-    <Shell title="PASSENGER DEX" kicker="PASSENGER BINDER" onBack={onBack} save={save}>
-      <p className="text-sm text-[#c9ddd8]">A face gets stamped only after you land it successfully. Silhouettes are still on the platform.</p>
+    <Shell title="PASSENGER DEX" kicker="KNOWN FACES" onBack={onBack} save={save}>
+      <p className="text-sm text-[#c9ddd8]">A face gets stamped only after you land it successfully. Everyone else is still a blank card.</p>
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {CARD_ORDER.map((id) => {
           const p = PASSENGERS[id];
@@ -443,9 +443,10 @@ export function CardsScreen({ save, onBack }: { save: SaveData; onBack: () => vo
               <div className="mt-3 space-y-2 text-xs">
                 <Bar label="MASS" value={picked.mass / 2.6} />
                 <Bar label="SIZE" value={picked.scale / 1.4} />
-                <Bar label="FARE" value={picked.fareWeight / 1.9} />
+                <Bar label="FARE VALUE" value={picked.fareWeight / 1.9} />
               </div>
               <div className="mt-3 text-xs text-[#9fb8b4]">Counts as {picked.countAs || "—"} · {picked.role}</div>
+              <p className="mt-1 text-[11px] leading-relaxed text-[#9fb8b4]">{picked.hint}</p>
               <button className="mt-4 border border-[#2c4a52] px-3 py-1 text-sm" onClick={() => setOpen(null)}>
                 CLOSE
               </button>
@@ -494,7 +495,7 @@ export function ResultsScreen({
   const [shown, setShown] = useState(0);
   const [copied, setCopied] = useState(false);
   const station = stationById(result.stationId === "endless" ? "sindorim" : result.stationId);
-  const titleStation = result.mode === "endless" ? "Loop Line" : station.name;
+  const titleStation = result.mode === "endless" ? "ENDLESS RUSH" : station.name;
 
   useEffect(() => {
     audio.ensure();
@@ -521,7 +522,7 @@ export function ResultsScreen({
           ? "Someone already aboard got launched back onto the platform."
           : "Self-evacuated. The record stands."
       : result.stationId === "seoul" && !result.bossBroken
-        ? "The suitcase won. Pull the zips harder."
+        ? "The suitcase won. Hit those zips harder."
         : result.stars >= 3
           ? "The legal capacity was only a suggestion."
           : result.stars === 2
@@ -543,15 +544,15 @@ export function ResultsScreen({
             <div className="text-xs">{titleStation} · 08:12</div>
           </div>
           <div className="my-3 border-t border-dashed border-[#1c140e]/40" />
-          <ReceiptRow k="MODE" v={result.mode === "endless" ? "ENDLESS RUSH" : "SCHEDULED RUN"} />
+          <ReceiptRow k="MODE" v={result.mode === "endless" ? "ENDLESS RUSH" : "CAMPAIGN"} />
           <ReceiptRow k="BOARDED" v={`${result.boarded}`} />
           {result.mode === "campaign" && (
             <>
-              <ReceiptRow k="WEIGHTED" v={`${result.weighted}`} />
+              <ReceiptRow k="WEIGHTED LOAD" v={`${result.weighted}`} />
               <ReceiptRow k="OFFICIAL CAP" v={`${result.capacity}`} />
               <ReceiptRow k="OCCUPANCY" v={`${Math.round(result.occupancy)}%`} />
               <ReceiptRow k="EJECTED" v={`${result.yeeted}`} />
-              <ReceiptRow k="SEATED BONUS" v={`${result.seated}`} />
+              <ReceiptRow k="SEATED" v={`${result.seated}`} />
             </>
           )}
           {result.mode === "endless" && (
@@ -563,10 +564,10 @@ export function ResultsScreen({
           )}
           <ReceiptRow k="BEST COMBO" v={`x${result.comboMax}`} />
           {result.perfect && <ReceiptRow k="NO INCIDENT" v="+15%" />}
-          {result.bossBroken && <ReceiptRow k="HAZARD PAY" v="CASE OPENED" />}
+          {result.bossBroken && <ReceiptRow k="CASE BONUS" v={won(500)} />}
           <div className="my-3 border-t border-dashed border-[#1c140e]/40" />
           <div className="flex items-end justify-between">
-            <span className="text-sm">TOTAL</span>
+            <span className="text-sm">TOTAL FARE</span>
             <span className="display text-4xl">{won(shown)}</span>
           </div>
           <p className="mt-4 text-center text-[11px]">* Do not fight the doors. We stuff. *</p>
@@ -627,7 +628,7 @@ export function ResultsScreen({
           {result.revenue > 0 &&
               (doubled ? (
                 <div className="mt-6 border border-[#f0c14a] bg-[#0c1c22] px-4 py-3 text-sm text-[#f0c14a]">
-                  Done. Ad reward doubled your fare: {won(result.revenue * 2)}
+                  Done. That ad doubled your fare: {won(result.revenue * 2)}
                 </div>
               ) : (
                 <button
@@ -651,7 +652,7 @@ export function ResultsScreen({
               LINE MAP
             </PanelButton>
             <PanelButton tone="ghost" onClick={onShop}>
-              BOOTH
+              TICKET BOOTH
             </PanelButton>
           </div>
           <button
@@ -707,7 +708,7 @@ function Shell({
       <div className="hazard h-2" />
       <header className="flex items-center justify-between gap-3 px-4 py-4 sm:px-8">
         <button className="border border-[#2c4a52] px-3 py-1 text-sm" onClick={onBack}>
-          ← PLATFORM
+          ← TITLE
         </button>
         <div className="text-right">
           <div className="text-[10px] tracking-[0.22em] text-[#7dffe1]">{kicker}</div>

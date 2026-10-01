@@ -29,7 +29,7 @@ export default function AdOverlay({ kind, onDone }: { kind: AdKind; onDone: (ok:
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-black/95 text-center text-white">
       <div className="rounded-full border border-white/30 px-3 py-1 text-xs tracking-widest text-white/60">
-        AD · MOCK
+        AD BREAK
       </div>
       <div className="text-6xl">🚇</div>
       <div className="text-2xl font-bold">AD IN PROGRESS...</div>

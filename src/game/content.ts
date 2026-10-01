@@ -100,7 +100,7 @@ export const PASSENGERS: Record<string, PassengerDef> = {
     rarity: "rare",
     blurb: "Shoves everyone on the way in. Great tipper, poor manners.",
     bark: ["Make it fast", "Is this legal?", "Charge it"],
-    hint: "High value. Compress him, then flick low into the door.",
+    hint: "High value. Compress him, then flick low into the gap.",
     image: "/images/cards/exec.webp",
   },
   student: {
@@ -146,7 +146,7 @@ export const PASSENGERS: Record<string, PassengerDef> = {
     face: "fierce",
     rarity: "legendary",
     blurb: "Seats herself even when the car is empty. Seat her for a bonus.",
-    bark: ["Sitting down", "I am fine", "I ride every day"],
+    bark: ["Taking a seat", "I'm fine", "I ride this every day"],
     hint: "Leave a gap. Land her seated for the seating bonus.",
     image: "/images/cards/grandma.webp",
   },
@@ -194,7 +194,7 @@ export const PASSENGERS: Record<string, PassengerDef> = {
     face: "sparkle",
     rarity: "legendary",
     blurb: "Two lightsticks and a premium fare. Landing her cleanly is worth it.",
-    bark: ["Fan club!", "Hello!", "My favourite line"],
+    bark: ["Fan club!", "Hello!", "My favorite line"],
     hint: "Top value, tiny mass. High arc, feather release.",
     image: "/images/cards/idol.webp",
   },
@@ -265,8 +265,8 @@ export const PASSENGERS: Record<string, PassengerDef> = {
     face: "grin",
     rarity: "legendary",
     blurb: "Not on the passenger list. Paid the fare anyway.",
-    bark: ["Meow", "Do not touch", "Just passing through"],
-    hint: "Trouble, but it pays. Loop her high over the door.",
+    bark: ["Meow", "Don't touch", "Just passing through"],
+    hint: "Trouble, but it pays. Lob her high over the door.",
   },
   luggage: {
     id: "luggage",
@@ -445,8 +445,8 @@ export const STATIONS: StationDef[] = [
       { id: "grandma", w: 1 },
     ],
     blurb: "The Giant Suitcase is on board and it is eating people. Break it first.",
-    announce: "Seoul Station. The Suitcase is chewing passengers. Handle the zips.",
-    ads: ["Seoul Station Souvenirs", "KTX Express Queue"],
+    announce: "Seoul Station. The suitcase is chewing passengers. Handle the zips.",
+    ads: ["Station Souvenirs", "KTX Express Queue"],
   },
   {
     id: "space",
@@ -510,12 +510,12 @@ export const ENDLESS_STATION: StationDef = {
 };
 
 export const TICKER = [
-  "The legal capacity is 200%. This train holds well over that. Compression costs time.",
-  "Sindorim transfers never compress well, and they are the heaviest thing on the platform.",
+  "The legal capacity is 100%. This train holds well over that. Compression costs time.",
+  "Sindorim transfer passengers never compress well, and they are the heaviest thing on the platform.",
   "Next stop Gangnam. Gangnam crowds get on light and leave heavy.",
   "The Giant Suitcase is eating passengers. Break the zips and boarding gets easy.",
   "Space Metro runs at twenty percent gravity. Low throws stay airborne for ages.",
-  "Your seating bonus is worth 0.4 seconds of dwell time. Do not waste the compressor.",
+  "A seated passenger is worth 0.4 seconds of door time. Do not waste a single pass.",
 ];
 
 export const UPGRADES = [
@@ -523,7 +523,7 @@ export const UPGRADES = [
     id: "compress" as const,
     name: "Crush Compactor",
     kicker: "COMPRESS",
-    desc: "Squashes passengers smaller at the door. Every bit past capacity gets crushed.",
+    desc: "Squashes passengers smaller at the door. Everything past capacity gets crushed.",
     max: 5,
     costs: [480, 980, 1680, 2860, 4600],
   },
