@@ -135,8 +135,7 @@ export class SubwayAudio {
     osc.stop(t + dur + 0.02);
   }
 
-  private noiseBurst(freq: number, dur: number, peak: number, kind: BiquadFilterType) {
-    const ctx = this.ctx;
+  private noiseBurst(freq: number, dur: number, peak: number, kind: BiquadFilterType) {    const ctx = this.ctx;
     const master = this.master;
     if (!ctx || !master || !this.noise) return;
     const t = ctx.currentTime;
@@ -155,6 +154,75 @@ export class SubwayAudio {
     gain.connect(master);
     src.start(t);
     src.stop(t + dur);
+  }
+  // ---- Background music: urgent rush-hour pulse, no assets ----
+  // Reuses tone(), which already routes through master (muted/adMuted-safe).
+  private musicGain: GainNode | null = null;
+  private musicTimer: number | null = null;
+  private musicStep = 0;
+
+  /** Idempotent. Call from a user gesture; AudioContext requires one. */
+  startMusic() {
+    this.ensure();
+    if (!this.ctx || !this.master) return;
+    if (!this.musicGain) {
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = 0.5;
+      this.musicGain.connect(this.master);
+    }
+    if (this.musicTimer !== null) return;
+    this.musicStep = 0;
+    this.musicTimer = window.setInterval(() => this.musicTick(), 130);
+  }
+
+  stopMusic() {
+    if (this.musicTimer !== null) {
+      window.clearInterval(this.musicTimer);
+      this.musicTimer = null;
+    }
+  }
+
+  private mtone(f0: number, dur: number, type: OscillatorType, peak: number, delay = 0) {
+    if (!this.ctx || !this.musicGain) return;
+    const ctx = this.ctx;
+    const t = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f0, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(peak, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(this.musicGain);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  }
+
+  private musicTick() {
+    // Never schedule while muted, ad-muted, hidden, or suspended; tails fade.
+    // The suspended check matters: startMusic() can run outside a user gesture
+    // (e.g. from an unmute effect), and scheduling onto a frozen clock would
+    // pile every note onto one timestamp.
+    if (this.muted || this.adMuted || document.hidden) return;
+    if (!this.ctx || this.ctx.state !== 'running') return;
+    const s = this.musicStep++ % 32;
+    // Urgent eighth-note pulse in D minor, triangle and low.
+    const pulse = [73.42, 73.42, 87.31, 73.42, 65.41, 73.42, 87.31, 98.0,
+      73.42, 73.42, 87.31, 73.42, 65.41, 65.41, 58.27, 58.27];
+    const p = pulse[s % 16];
+    if (p !== undefined) this.mtone(p, 0.12, 'triangle', 0.055);
+    // Door-chime motif every two bars: two bright stabs a fifth apart.
+    if (s % 16 === 0) {
+      this.mtone(880.0, 0.18, 'sine', 0.04);
+      this.mtone(1318.5, 0.24, 'sine', 0.035, 0.14);
+    }
+    // Hurried sixteenth-run filler on the back half of each bar.
+    if (s % 16 >= 8 && s % 2 === 1) {
+      const run = [293.66, 329.63, 349.23, 392.0, 440.0, 392.0, 349.23, 329.63];
+      const f = run[s % 8];
+      if (f !== undefined) this.mtone(f, 0.09, 'square', 0.022);
+    }
   }
 }
 

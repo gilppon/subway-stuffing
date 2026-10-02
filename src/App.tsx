@@ -33,6 +33,10 @@ export default function App() {
 
   useEffect(() => {
     audio.setMuted(save.muted);
+    // Unmuting here may run outside the click gesture, so the context can stay
+    // suspended; startMusic is idempotent and the tick skips non-running states,
+    // so the next real gesture resumes cleanly with no queued-note burst.
+    if (!save.muted) audio.startMusic();
   }, [save.muted]);
 
   // Rewarded ad: double the result revenue
@@ -64,6 +68,8 @@ export default function App() {
   function bootAudio() {
     audio.ensure();
     audio.play("ui");
+    // Music needs the same first gesture as the AudioContext itself.
+    audio.startMusic();
   }
 
   function ride(id: string, nextMode: Mode) {
