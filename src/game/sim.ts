@@ -113,6 +113,7 @@ interface SimOpts {
   upgrades: Upgrades;
   owned: string[];
   reduced: boolean;
+  firstRunIntro: boolean;
   onSfx: (s: Sfx) => void;
   onComplete: (r: RunResult) => void;
 }
@@ -252,6 +253,7 @@ export class SubwaySim {
   capped = false;
   reported = false;
   hasLaunched = false;
+  private introWaitForLaunch: boolean;
   warned2 = false;
   warned1 = false;
   crossed100 = false;
@@ -264,6 +266,7 @@ export class SubwaySim {
 
   constructor(private opts: SimOpts) {
     this.reduce = opts.reduced;
+    this.introWaitForLaunch = opts.firstRunIntro;
     const count = opts.mode === "endless" ? 6 : opts.station.queue;
     this.queue = rollQueue(opts.station, count);
     this.spawnNext();
@@ -343,6 +346,10 @@ export class SubwaySim {
     this.launch(power);
   }
 
+  skipFirstRunIntro() {
+    this.introWaitForLaunch = false;
+  }
+
   private setPull(dx: number, dy: number) {
     if (dx > -4) {
       this.pullX = 0;
@@ -404,6 +411,7 @@ export class SubwaySim {
     this.burst(chest.x, chest.y, "#f0c14a", 8, 180);
     this.opts.onSfx("launch");
     this.hasLaunched = true;
+    this.introWaitForLaunch = false;
     this.launches++;
     if (this.elapsed - this.lastLaunch < 0.55) this.combo += 1;
     else this.combo = 1;
@@ -478,6 +486,7 @@ export class SubwaySim {
       return;
     }
     if (this.phase === "aim") {
+      if (this.introWaitForLaunch && !this.hasLaunched) return;
       this.timeLeft -= dt;
       if (!this.warned2 && this.timeLeft <= 2) {
         this.warned2 = true;

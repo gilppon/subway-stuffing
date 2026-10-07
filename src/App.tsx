@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AdOverlay, { type AdState } from "./components/AdOverlay";
 import { GameView } from "./components/GameView";
 import { CardsScreen, MapScreen, ResultsScreen, ShopScreen, TitleScreen, nextStationId } from "./components/Screens";
 import { Ads, registerAdUI } from "./game/ads";
 import { audio } from "./game/audio";
+import { readSubwayChallenge } from "./game/share";
 import { ENDLESS_STATION, SPACE_PASS_COST, UPGRADES, stationById } from "./game/content";
 import { applyResult, defaultSave, loadSave, persistSave } from "./game/save";
 import type { Mode, RunResult, SaveData, Screen } from "./game/types";
@@ -18,7 +19,7 @@ export default function App() {
   const [ad, setAd] = useState<AdState | null>(null);
   const [adBusy, setAdBusy] = useState(false);
   const [doubled, setDoubled] = useState(false);
-  const sessionRef = useRef(1);
+  const [challenge] = useState(readSubwayChallenge);
 
   // Portal SDK init + mock ad UI registration
   useEffect(() => {
@@ -77,18 +78,21 @@ export default function App() {
     setStationId(id);
     setMode(nextMode);
     setSession((n) => n + 1);
-    sessionRef.current += 1;
     setDoubled(false);
     setScreen("play");
     Ads.gameplayStart();
   }
 
-  /** Interstitial only at the rest point between runs (every 2nd run) */
-  async function leaveTo(next: () => void) {
-    if (sessionRef.current > 1 && sessionRef.current % 2 === 0) {
-      await Ads.commercialBreak();
-    }
+  /** Leave a completed run without showing an ad when returning to a menu. */
+  function leaveTo(next: () => void) {
     Ads.gameplayStop();
+    next();
+  }
+
+  /** Signal a natural break only when the player chooses to continue playing. */
+  async function continueRun(next: () => void) {
+    Ads.gameplayStop();
+    await Ads.commercialBreak();
     next();
   }
 
@@ -142,6 +146,11 @@ export default function App() {
           }}
           onMute={() => setSave((s) => ({ ...s, muted: !s.muted }))}
           onNick={(nickname) => setSave((s) => ({ ...s, nickname }))}
+          challenge={challenge}
+          onChallenge={() => {
+            if (!challenge) return;
+            ride(challenge.stationId, challenge.mode);
+          }}
         />
       )}
       {screen === "map" && (
@@ -193,10 +202,10 @@ export default function App() {
           doubled={doubled}
           adBusy={adBusy}
           onWatchAd={watchDouble}
-          onRetry={() => ride(result.mode === "endless" ? "endless" : result.stationId, result.mode)}
-          onMap={() => void leaveTo(() => setScreen("map"))}
-          onShop={() => void leaveTo(() => setScreen("shop"))}
-          onNext={nextId ? () => ride(nextId, "campaign") : undefined}
+          onRetry={() => void continueRun(() => ride(result.mode === "endless" ? "endless" : result.stationId, result.mode))}
+          onMap={() => leaveTo(() => setScreen("map"))}
+          onShop={() => leaveTo(() => setScreen("shop"))}
+          onNext={nextId ? () => void continueRun(() => ride(nextId, "campaign")) : undefined}
         />
       )}
       {ad && (

@@ -22,6 +22,9 @@ let adUI: AdUI | null = null;
 let provider: "poki" | "crazy" | null = null;
 let ready = false;
 let initPromise: Promise<void> | null = null;
+let loadingFinishedSent = false;
+let gameplayRequested = false;
+let gameplayActive = false;
 
 export function registerAdUI(fn: AdUI | null) {
   adUI = fn;
@@ -96,32 +99,39 @@ export const Ads = {
   },
 
   loadingFinished() {
-    if (!ready) return;
+    if (!ready || loadingFinishedSent) return;
     try {
       if (provider === "poki") window.PokiSDK?.gameLoadingFinished?.();
       else if (provider === "crazy") window.CrazyGames?.SDK?.game?.loadingStop();
     } catch {
       /* ignore */
     }
+    loadingFinishedSent = true;
+    if (gameplayRequested) this.gameplayStart();
   },
 
   gameplayStart() {
-    if (!ready) return;
+    gameplayRequested = true;
+    if (!ready || !loadingFinishedSent || gameplayActive || !provider) return;
     try {
       if (provider === "poki") window.PokiSDK?.gameplayStart?.();
       else if (provider === "crazy") window.CrazyGames?.SDK?.game?.gameplayStart();
+      gameplayActive = true;
     } catch {
       /* ignore */
     }
   },
 
   gameplayStop() {
-    if (!ready) return;
+    gameplayRequested = false;
+    if (!ready || !loadingFinishedSent || !gameplayActive || !provider) return;
     try {
       if (provider === "poki") window.PokiSDK?.gameplayStop?.();
       else if (provider === "crazy") window.CrazyGames?.SDK?.game?.gameplayStop();
     } catch {
       /* ignore */
+    } finally {
+      gameplayActive = false;
     }
   },
 
@@ -204,6 +214,8 @@ export const Ads = {
         audio.setAdMuted(false);
       }
     }
+    // A portal without a working SDK must not receive a simulated reward.
+    if (env() !== null) return false;
     if (!adUI) return false;
     return withTimeout(new Promise<boolean>((r) => adUI!("rewarded", (ok) => r(ok))), 20000, false);
   },

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { audio } from "../game/audio";
+import { Ads } from "../game/ads";
 import { compressOf } from "../game/content";
 import { PASSENGERS } from "../game/content";
 import { L, SubwaySim, type HudSnap } from "../game/sim";
@@ -38,6 +39,7 @@ export function GameView({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<SubwaySim | null>(null);
   const pausedRef = useRef(false);
+  const resumeBusyRef = useRef(false);
   const completeRef = useRef(onComplete);
   completeRef.current = onComplete;
   const [paused, setPaused] = useState(false);
@@ -60,13 +62,30 @@ export function GameView({
     pausedRef.current = paused;
   }, [paused]);
 
+  const applyPause = async (nextPaused: boolean) => {
+    if (pausedRef.current === nextPaused) return;
+    if (nextPaused) {
+      pausedRef.current = true;
+      setPaused(true);
+      Ads.gameplayStop();
+      return;
+    }
+    if (resumeBusyRef.current) return;
+    resumeBusyRef.current = true;
+    try {
+      await Ads.commercialBreak();
+      pausedRef.current = false;
+      setPaused(false);
+      Ads.gameplayStart();
+    } finally {
+      resumeBusyRef.current = false;
+    }
+  };
+
   // Auto-pause on tab switch / focus loss so the wall-clock timer cannot run away.
   useEffect(() => {
     const autoPause = () => {
-      setPaused((p) => {
-        if (p) return p;
-        return true;
-      });
+      void applyPause(true);
     };
     const onVis = () => {
       if (document.hidden) autoPause();
@@ -93,6 +112,7 @@ export function GameView({
       upgrades,
       owned,
       reduced: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      firstRunIntro: !seenIntro && station.id === "sindorim" && mode === "campaign",
       onSfx: (name) => audio.play(name),
       onComplete: (result) => completeRef.current(result),
     });
@@ -123,7 +143,7 @@ export function GameView({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPaused((p) => !p);
+      if (e.key === "Escape") void applyPause(!pausedRef.current);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -183,7 +203,7 @@ export function GameView({
           </div>
           <button
             className="border border-[#2c4a52] px-2 py-1 text-xs"
-            onClick={() => setPaused(true)}
+            onClick={() => void applyPause(true)}
           >
             PAUSE
           </button>
@@ -221,7 +241,7 @@ export function GameView({
             }}
             onPointerUp={() => {
               simRef.current?.pointerUp();
-              if (coach) {
+              if (coach && simRef.current?.hasLaunched) {
                 setCoach(false);
                 onIntroSeen();
               }
@@ -260,6 +280,7 @@ export function GameView({
                   <button
                     className="border border-[#2c4a52] px-2 py-0.5 text-[11px] text-[#9fb8b4] hover:text-[#f4efe6]"
                     onClick={() => {
+                      simRef.current?.skipFirstRunIntro();
                       setCoach(false);
                       onIntroSeen();
                     }}
@@ -291,7 +312,7 @@ export function GameView({
                 <div className="text-[10px] tracking-[0.28em] text-[#7dffe1]">PAUSED</div>
                 <div className="display text-4xl">PAUSED</div>
                 <div className="mt-4 grid gap-2">
-                  <button className="border border-[#f0c14a] px-3 py-2 text-left" onClick={() => setPaused(false)}>
+                  <button className="border border-[#f0c14a] px-3 py-2 text-left" onClick={() => void applyPause(false)}>
                     KEEP STUFFING
                   </button>
                   {mode === "endless" && (

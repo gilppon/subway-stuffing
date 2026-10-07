@@ -13,6 +13,7 @@ import {
   won,
 } from "../game/content";
 import type { RunResult, SaveData, StationDef } from "../game/types";
+import { createSubwayShareUrl, type SubwayChallenge } from "../game/share";
 import { cn } from "../utils/cn";
 
 function PanelButton({
@@ -64,6 +65,8 @@ export function TitleScreen({
   onCards,
   onMute,
   onNick,
+  challenge,
+  onChallenge,
 }: {
   save: SaveData;
   onRide: () => void;
@@ -73,6 +76,8 @@ export function TitleScreen({
   onCards: () => void;
   onMute: () => void;
   onNick: (name: string) => void;
+  challenge?: SubwayChallenge | null;
+  onChallenge?: () => void;
 }) {
   const starred = Object.values(save.stars).filter((n) => n > 0).length;
   return (
@@ -99,7 +104,7 @@ export function TitleScreen({
       <main className="relative grid items-end gap-8 px-4 pb-24 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:pb-16">
         <section className="max-w-xl">
           <p className="text-xs tracking-[0.35em] text-[#f0c14a]">LAST TRAIN · HUMAN TETRIS</p>
-          <h1 className="display mt-2 text-[clamp(72px,12vw,132px)] leading-[0.84] text-[#f4efe6]">
+          <h1 className="display mt-2 text-[clamp(48px,15vw,132px)] leading-[0.84] text-[#f4efe6]">
             SUBWAY
             <span className="block text-[#f0c14a]">STUFFING</span>
           </h1>
@@ -115,6 +120,19 @@ export function TitleScreen({
               ENDLESS RUSH
             </PanelButton>
           </div>
+          {challenge && onChallenge && (
+            <div className="mt-4 max-w-lg border-2 border-[#7dffe1] bg-[#071014]/90 p-3 shadow-[4px_4px_0_#1d6b62]">
+              <div className="text-[10px] tracking-[0.22em] text-[#7dffe1]">FRIEND’S TRAIN RECORD</div>
+              <div className="mt-1 text-sm text-[#f4efe6]">
+                {challenge.mode === "endless"
+                  ? `${challenge.peak} aboard · ${challenge.combo}x best combo`
+                  : `${stationById(challenge.stationId).name} · ${Math.round(challenge.occupancy)}% occupancy · ${challenge.boarded} riders`}
+              </div>
+              <button onClick={onChallenge} className="mt-2 border border-[#f0c14a] bg-[#0c1c22] px-3 py-2 text-xs font-bold text-[#f0c14a]">
+                TAKE THIS COMMUTE
+              </button>
+            </div>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             <PanelButton tone="ghost" onClick={onMap}>
               LINE MAP
@@ -500,6 +518,8 @@ export function ResultsScreen({
 }) {
   const [shown, setShown] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareStatus, setShareStatus] = useState("");
   const station = stationById(result.stationId === "endless" ? "sindorim" : result.stationId);
   const titleStation = result.mode === "endless" ? "ENDLESS RUSH" : station.name;
 
@@ -518,6 +538,16 @@ export function ResultsScreen({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
+  }, [result]);
+
+  useEffect(() => {
+    let active = true;
+    void createSubwayShareUrl(result).then((url) => {
+      if (active) setShareUrl(url);
+    });
+    return () => {
+      active = false;
+    };
   }, [result]);
 
   const verdict =
@@ -644,11 +674,11 @@ export function ResultsScreen({
                 </div>
               ) : (
                 <button
-                  className="mt-6 w-full border-2 border-[#7dffe1] bg-[#0c1c22] px-4 py-3 text-sm font-bold text-[#7dffe1] disabled:opacity-50"
+                  className="mt-6 w-full border-2 border-[#f0c14a] bg-[#0c1c22] px-4 py-3 text-sm font-bold text-[#f0c14a] disabled:opacity-50"
                   disabled={adBusy}
                   onClick={onWatchAd}
                 >
-                  AD · {adBusy ? "LOADING..." : `DOUBLE YOUR FARE (+${won(result.revenue)})`}
+                  🎬 {adBusy ? "LOADING..." : `DOUBLE YOUR FARE (+${won(result.revenue)})`}
                 </button>
               ))}
           <div className="mt-6 flex flex-wrap gap-2">
@@ -667,6 +697,35 @@ export function ResultsScreen({
               TICKET BOOTH
             </PanelButton>
           </div>
+          <button
+            className="mt-3 border border-[#7dffe1]/60 px-3 py-2 text-xs text-[#7dffe1]"
+            onClick={async () => {
+              const text = result.mode === "endless"
+                ? `Can you beat my Subway Stuffing train? ${result.peak} aboard with a ${result.comboMax}x combo.`
+                : `Can you beat my ${titleStation} rush? ${Math.round(result.occupancy)}% occupancy and ${result.boarded} riders aboard.`;
+              const url = shareUrl || window.location.href;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: "Subway Stuffing challenge", text, url });
+                  setShareStatus("Challenge shared! 🚇");
+                  return;
+                }
+                await navigator.clipboard.writeText(`${text} ${url}`);
+                setShareStatus("Challenge link copied! Send it to a friend 🚇");
+              } catch (error) {
+                if (error instanceof DOMException && error.name === "AbortError") return;
+                try {
+                  await navigator.clipboard.writeText(`${text} ${url}`);
+                  setShareStatus("Challenge link copied! Send it to a friend 🚇");
+                } catch {
+                  setShareStatus("Copy the game link from your browser to challenge a friend.");
+                }
+              }
+            }}
+          >
+            CHALLENGE A FRIEND · SHARE RIDE
+          </button>
+          {shareStatus && <p aria-live="polite" className="mt-2 text-xs text-[#7dffe1]">{shareStatus}</p>}
           <button
             className="mt-4 text-xs text-[#9fb8b4] underline"
             onClick={async () => {
