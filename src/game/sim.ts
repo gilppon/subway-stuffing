@@ -408,16 +408,18 @@ export class SubwaySim {
     };
     this.dolls.push(doll);
     this.float(chest.x, chest.y - 46, doll.bark, "#f4efe6");
-    this.burst(chest.x, chest.y, "#f0c14a", 8, 180);
+    this.burst(chest.x, chest.y, "#f0c14a", 14, 240);
+    this.burst(chest.x - 20, chest.y, "#ffffff", 6, 160);
+    if (!this.reduce) this.shake = Math.max(this.shake, power * 7);
     this.opts.onSfx("launch");
     this.hasLaunched = true;
     this.introWaitForLaunch = false;
     this.launches++;
-    if (this.elapsed - this.lastLaunch < 0.55) this.combo += 1;
+    if (this.elapsed - this.lastLaunch < 0.65) this.combo += 1;
     else this.combo = 1;
     this.comboMax = Math.max(this.comboMax, this.combo);
     this.lastLaunch = this.elapsed;
-    if (this.combo >= 2) this.float(chest.x, chest.y - 78, `COMBO x${this.combo}`, "#7dffe1");
+    if (this.combo >= 2) this.float(chest.x, chest.y - 78, `🔥 COMBO x${this.combo}!`, "#ff9f1a");
     this.pullX = 0;
     this.pullY = 0;
     this.spawnNext();
@@ -1233,6 +1235,14 @@ export class SubwaySim {
     ctx.fillStyle = station.color;
     ctx.fillRect(36, 188, 42, 8);
 
+    // Embossed yellow tactile safety line along the platform edge
+    ctx.fillStyle = "#f59e0b";
+    ctx.fillRect(0, L.floor - 4, L.shellL, 5);
+    ctx.fillStyle = "#d97706";
+    for (let x = 0; x < L.shellL; x += 22) {
+      ctx.fillRect(x, L.floor - 11, 12, 7);
+    }
+
     ctx.fillStyle = "#d8a82e";
     ctx.fillRect(628, L.floor - 8, 60, 8);
     for (let i = 0; i < 5; i++) {
@@ -1244,26 +1254,28 @@ export class SubwaySim {
     ctx.fillRect(0, L.floor, L.W, L.H - L.floor);
     ctx.fillStyle = "#16343c";
     for (let x = 0; x < L.shellL; x += 32) ctx.fillRect(x, L.floor, 28, 10);
-    ctx.fillStyle = "rgba(240,193,74,0.85)";
-    ctx.fillRect(0, L.floor, L.shellL, 3);
 
-    ctx.fillStyle = "#10181c";
-    ctx.font = "700 13px 'IBM Plex Sans', sans-serif";
+    // Glowing Station Pillar Sign
+    ctx.save();
+    ctx.shadowColor = station.color;
+    ctx.shadowBlur = 8;
     ctx.fillStyle = "#f4efe6";
-    roundRect(ctx, 48, 196, 22, 22, 11);
+    roundRect(ctx, 48, 196, 24, 24, 12);
     ctx.fillStyle = station.color;
     ctx.fill();
-    ctx.fillStyle = "#071014";
-    ctx.font = "700 12px 'IBM Plex Sans', sans-serif";
+    ctx.restore();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 13px 'Jua', 'IBM Plex Sans', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(station.line, 59, 212);
+    ctx.fillText(station.line, 60, 213);
     ctx.textAlign = "left";
     ctx.fillStyle = "#f4efe6";
-    ctx.font = "700 16px 'IBM Plex Sans', sans-serif";
-    ctx.fillText(station.name, 78, 212);
-    ctx.fillStyle = "rgba(244,239,230,0.55)";
-    ctx.font = "12px 'IBM Plex Sans', sans-serif";
-    ctx.fillText("BOARD HERE", 78, 228);
+    ctx.font = "800 18px 'Jua', 'IBM Plex Sans', sans-serif";
+    ctx.fillText(station.name, 80, 213);
+    ctx.fillStyle = "rgba(244,239,230,0.65)";
+    ctx.font = "700 12px 'IBM Plex Sans', sans-serif";
+    ctx.fillText("BOARDING PLATFORM", 80, 230);
   }
 
   private drawTrainInterior(ctx: CanvasRenderingContext2D) {
@@ -1935,40 +1947,83 @@ export class SubwaySim {
     const def = this.current;
     const chestX = def ? L.restX + this.pullX : L.restX;
     const chestY = def ? chestRestY(def) + this.pullY : 520;
+
+    // Stuffer metallic post
     ctx.strokeStyle = "#1c242c";
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 10;
     ctx.lineCap = "round";
     ctx.beginPath();
-    ctx.moveTo(L.forkX, 430);
-    ctx.lineTo(L.forkX, 590);
+    ctx.moveTo(L.forkX, 428);
+    ctx.lineTo(L.forkX, 592);
     ctx.stroke();
-    ctx.strokeStyle = "#d7dee4";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(L.forkX, 434);
-    ctx.lineTo(L.forkX, 586);
-    ctx.stroke();
-    ctx.fillStyle = "#f0c14a";
-    ctx.fillRect(L.forkX - 10, 500, 20, 10);
-    const slack = this.pulling ? 3 : 5;
-    ctx.strokeStyle = "#1a1a1a";
-    ctx.lineWidth = slack;
-    ctx.beginPath();
-    ctx.moveTo(L.forkX, 455);
-    ctx.lineTo(chestX - 6, chestY - 8);
-    ctx.lineTo(L.forkX, 560);
-    ctx.stroke();
-    ctx.fillStyle = "#101418";
-    ctx.font = "700 12px 'IBM Plex Sans', sans-serif";
-    ctx.fillText("STUFFER 01", L.forkX - 36, 582);
 
+    ctx.strokeStyle = "#d7dee4";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(L.forkX, 432);
+    ctx.lineTo(L.forkX, 588);
+    ctx.stroke();
+
+    ctx.fillStyle = "#f0c14a";
+    ctx.fillRect(L.forkX - 12, 498, 24, 12);
+
+    const p = this.pulling ? Math.hypot(this.pullX, this.pullY) / L.maxPull : 0;
+
+    // High-tension elastic sling band
+    ctx.save();
     if (this.pulling) {
-      const p = Math.hypot(this.pullX, this.pullY) / L.maxPull;
-      ctx.fillStyle = "#102228";
-      roundRect(ctx, chestX - 28, chestY - 62, 56, 16, 4);
+      ctx.shadowColor = p > 0.82 ? "#ff4757" : p > 0.5 ? "#ffa502" : "#2ed573";
+      ctx.shadowBlur = 12 * p;
+      ctx.strokeStyle = p > 0.82 ? "#ff3838" : p > 0.5 ? "#ff9f1a" : "#2ed573";
+      ctx.lineWidth = 5 + p * 2;
+    } else {
+      ctx.strokeStyle = "#2f3542";
+      ctx.lineWidth = 5;
+    }
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(L.forkX, 452);
+    ctx.lineTo(chestX - 6, chestY - 8);
+    ctx.lineTo(L.forkX, 562);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = "#101418";
+    ctx.font = "800 13px 'Jua', 'IBM Plex Sans', sans-serif";
+    ctx.fillText("STUFFER 01", L.forkX - 38, 582);
+
+    // 3D Jelly Power Meter Bar
+    if (this.pulling) {
+      ctx.save();
+      const bx = chestX - 34;
+      const by = chestY - 68;
+      const bw = 68;
+      const bh = 18;
+
+      ctx.fillStyle = "rgba(10, 25, 30, 0.85)";
+      roundRect(ctx, bx, by, bw, bh, 6);
       ctx.fill();
-      ctx.fillStyle = p > 0.82 ? "#ff5a3c" : "#f0c14a";
-      ctx.fillRect(chestX - 26, chestY - 60, 52 * p, 12);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+      ctx.stroke();
+
+      // Filled gradient bar
+      const grad = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+      grad.addColorStop(0, "#2ed573");
+      grad.addColorStop(0.6, "#ffa502");
+      grad.addColorStop(1, "#ff4757");
+      ctx.fillStyle = grad;
+      roundRect(ctx, bx + 2, by + 2, Math.max(4, (bw - 4) * p), bh - 4, 4);
+      ctx.fill();
+
+      if (p > 0.88) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("⚡ MAX", chestX, by + 12);
+      }
+      ctx.restore();
     }
   }
 
@@ -1976,8 +2031,8 @@ export class SubwaySim {
     if (!this.pulling || !this.current) {
       if (!this.hasLaunched && this.opts.station.id === "sindorim" && this.current && this.phase === "aim") {
         ctx.setLineDash([5, 7]);
-        ctx.strokeStyle = "rgba(240,193,74,0.45)";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgba(240,193,74,0.55)";
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(L.restX, chestRestY(this.current));
         ctx.lineTo(L.inL + 80, 470);
@@ -1994,16 +2049,32 @@ export class SubwaySim {
     let vx = (-this.pullX / dist) * speed;
     let vy = (-this.pullY / dist) * speed;
     const g = this.opts.station.gravity;
-    for (let i = 0; i < 22; i++) {
+    let lastX = x;
+    let lastY = y;
+
+    for (let i = 0; i < 24; i++) {
       const gust = this.opts.station.wind ? Math.sin((this.elapsed + i * 0.045) * 2.35) * this.opts.station.wind : 0;
       vy += g * 0.045;
       vx += gust * 0.045 * 0.55;
       x += vx * 0.045;
       y += vy * 0.045;
+      lastX = x;
+      lastY = y;
+
+      const beadRad = Math.max(2.2, 5.5 - i * 0.16);
+
+      // Outer glow bead
       ctx.beginPath();
-      ctx.arc(x, y, Math.max(2, 5 - i * 0.18), 0, Math.PI * 2);
-      ctx.fillStyle = i > 14 ? "rgba(255,90,60,0.8)" : "rgba(240,193,74,0.9)";
+      ctx.arc(x, y, beadRad + 2, 0, Math.PI * 2);
+      ctx.fillStyle = i > 15 ? "rgba(255, 71, 87, 0.4)" : "rgba(255, 214, 0, 0.45)";
       ctx.fill();
+
+      // Core crisp bead
+      ctx.beginPath();
+      ctx.arc(x, y, beadRad, 0, Math.PI * 2);
+      ctx.fillStyle = i > 15 ? "#ff4757" : "#ffd32a";
+      ctx.fill();
+
       if (y > L.floor - 8) break;
       if (x > L.inR) break;
       if (this.opts.station.poleTop > 0 && x > L.shellL && x < L.inL && y > this.opts.station.poleTop) break;
@@ -2012,6 +2083,16 @@ export class SubwaySim {
         if (x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h) break;
       }
     }
+
+    // Target landing reticle ring at trajectory apex
+    ctx.save();
+    ctx.strokeStyle = power > 0.8 ? "rgba(255, 71, 87, 0.85)" : "rgba(255, 211, 42, 0.85)";
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 15, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   private drawParticles(ctx: CanvasRenderingContext2D) {
